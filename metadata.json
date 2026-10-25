@@ -1,0 +1,6 @@
+{
+  "name": "Love Movier - Cinema & Streaming Hub",
+  "description": "Corporate streaming platform with real-time movie metadata, official HD trailers, 2026 releases, and interactive cinema rooms.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
