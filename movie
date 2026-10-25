@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love Movier - Streaming & Cinema Hub</title>
+  <meta name="description" content="Corporate streaming platform with real-time movie metadata, official HD trailers, 2026 releases, and interactive cinema rooms." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#e50914',
+              hover: '#b80710',
+              dark: '#0b0b0e',
+              card: '#121318',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    .font-brand {
+      font-family: 'Outfit', sans-serif;
+    }
+    /* Hide scrollbar for clean carousel */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0b0e] text-slate-100 antialiased selection:bg-red-600 selection:text-white dark">
+
+  <!-- ==================== TOP NAVBAR ==================== -->
+  <header id="mainNavbar" class="sticky top-0 z-40 w-full transition-colors border-b backdrop-blur-md px-4 sm:px-8 py-3 flex items-center justify-between gap-4 bg-[#0b0b0e]/90 border-slate-800/80 text-white">
+    <!-- Brand Logo -->
+    <div class="flex items-center gap-6">
+      <button onclick="switchView('home')" class="flex items-center gap-2.5 group focus:outline-none text-left">
+        <div class="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center text-white shadow-md shadow-red-600/30 group-hover:bg-red-500 transition-colors">
+          <i data-lucide="film" class="w-4 h-4"></i>
+        </div>
+        <div class="flex flex-col">
+          <span id="logoText" class="text-lg font-black tracking-wider leading-none font-brand text-white">
+            LOVE <span class="text-red-600">MOVIER</span>
+          </span>
+        </div>
+      </button>
+
+      <!-- Center Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+        <button onclick="filterCatalog('movies')" class="hover:text-red-500 transition-colors py-1">Movies</button>
+        <button onclick="filterCatalog('tv')" class="hover:text-red-500 transition-colors py-1">TV Shows</button>
+        <button onclick="switchView('watchlist')" class="hover:text-red-500 transition-colors py-1">My List</button>
+      </nav>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-3 sm:gap-5">
+      <!-- Live Real-Time Clock -->
+      <div class="hidden lg:flex flex-col text-right pr-3 border-r border-slate-700/60">
+        <span id="clockTime" class="text-xs font-bold text-white tracking-wide font-mono">12:30 PM</span>
+        <span id="clockDate" class="text-[10px] text-slate-400 font-medium">17th June 2026</span>
+      </div>
+
+      <!-- Live Search Filter -->
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input
+          id="searchInput"
+          type="text"
+          oninput="handleSearch(this.value)"
+          placeholder="Search movie, director, 2026..."
+          class="w-36 sm:w-56 md:w-64 pl-9 pr-3 py-1.5 text-xs rounded-full border border-slate-700 bg-slate-900/90 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:w-72 transition-all"
+        />
+      </div>
+
+      <!-- Night & Light Mode Toggle -->
+      <button
+        id="themeToggleBtn"
+        onclick="toggleTheme()"
+        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700 transition-all"
+        title="Toggle Night/Light Mode"
+      >
+        <i id="themeIcon" data-lucide="moon" class="w-3.5 h-3.5"></i>
+        <span id="themeLabel" class="hidden sm:inline">Night</span>
+      </button>
+
+      <!-- Notification Bell -->
+      <div class="relative">
+        <button onclick="toggleNotificationMenu()" class="p-2 rounded-full border border-slate-700 bg-slate-800 text-slate-300 hover:text-white transition-colors relative">
+          <i data-lucide="bell" class="w-4 h-4"></i>
+          <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center">2</span>
+        </button>
+
+        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-72 rounded-xl shadow-2xl border border-slate-700 bg-[#0f1015] p-3 z-50 text-white">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider">Notifications</span>
+            <span class="text-[10px] text-red-500 cursor-pointer font-semibold" onclick="showToast('Semua notifikasi ditandai telah dibaca')">Tandai Dibaca</span>
+          </div>
+          <div class="space-y-2 text-xs">
+            <div class="p-2 rounded-lg bg-red-500/10 border border-red-500/20 cursor-pointer" onclick="handleCardClick('dune-part-three')">
+              <p class="font-bold text-red-400">🔥 Premier 2026 Tersedia</p>
+              <p class="text-[11px] text-slate-300">Trailer 4K HDR Dune: Messiah kini resmi tayang!</p>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-800/40 cursor-pointer" onclick="switchView('parties')">
+              <p class="font-semibold">Undangan Watch Party</p>
+              <p class="text-[11px] text-slate-400">Marcus mengundang Anda ke Money Heist Finale Party.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Profile -->
+      <button onclick="switchView('setting')" class="relative focus:outline-none">
+        <img
+          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+          alt="Avatar"
+          class="w-8 h-8 rounded-full object-cover ring-2 ring-red-500/50 hover:ring-red-500 transition-all"
+        />
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN 3-COLUMN WRAPPER ==================== -->
+  <div class="flex-1 flex max-w-[1720px] w-full mx-auto">
+    
+    <!-- ==================== 1. LEFT SIDEBAR ==================== -->
+    <aside id="mainSidebar" class="w-60 shrink-0 border-r border-slate-800/80 min-h-[calc(100vh-65px)] p-4 flex flex-col justify-between hidden md:flex bg-[#0d0e12] text-slate-300">
+      <div class="space-y-6">
+        <div>
+          <span class="text-[11px] font-bold tracking-wider uppercase text-slate-500 px-3 mb-2 block">Navigation Menu</span>
+          <nav class="space-y-1">
+            <button onclick="switchView('home')" id="nav-home" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-red-600 text-white shadow-md shadow-red-600/30">
+              <div class="flex items-center gap-3">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                <span>Home</span>
+              </div>
+            </button>
+            <button onclick="switchView('watchlist')" id="nav-watchlist" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="bookmark" class="w-4 h-4"></i>
+                <span>Watch List</span>
+              </div>
+              <span id="watchlistBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white">2</span>
+            </button>
+            <button onclick="switchView('coming_soon')" id="nav-coming_soon" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="calendar" class="w-4 h-4"></i>
+                <span>Coming Soon</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white">2026</span>
+            </button>
+            <button onclick="switchView('discovery')" id="nav-discovery" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+                <span>Discovery</span>
+              </div>
+            </button>
+            <button onclick="switchView('friends')" id="nav-friends" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span>Friends</span>
+              </div>
+            </button>
+            <button onclick="switchView('parties')" id="nav-parties" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="tv" class="w-4 h-4"></i>
+                <span>Parties</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 animate-pulse">Live</span>
+            </button>
+            <button onclick="switchView('media')" id="nav-media" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="film" class="w-4 h-4"></i>
+                <span>Media</span>
+              </div>
+            </button>
+            <button onclick="switchView('setting')" id="nav-setting" class="sidebar-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800/60 hover:text-white">
+              <div class="flex items-center gap-3">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                <span>Setting</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        <div class="p-3 rounded-xl border border-slate-800 bg-slate-900/40">
+          <div class="flex items-center gap-2 mb-1 text-xs font-bold text-red-400">
+            <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+            <span>2026 Premiere Season</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Nikmati streaming trailer eksklusif & info film 2026 kualitas 4K UHD.</p>
+        </div>
+      </div>
+
+      <!-- Backlink & Attribution Sesuai Instruksi -->
+      <div class="pt-4 border-t border-slate-800/60 space-y-1.5 text-[11px] text-slate-500">
+        <span class="text-slate-400 font-medium">Partner Resmi:</span>
+        <a href="https://www.aannisaputriiiiy.store" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:text-red-300 font-bold flex items-center justify-between">
+          <span>aannisaputriiiiystore</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+        <span class="text-[10px] text-slate-500 block">20Backlink_Gratis</span>
+      </div>
+    </aside>
+
+    <!-- ==================== 2. MAIN CONTENT ==================== -->
+    <main id="mainContainer" class="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto max-w-full">
+      
+      <!-- HOME VIEW -->
+      <section id="view-home" class="view-panel space-y-8">
+        
+        <!-- Hero Section (Matches Money Heist photo) -->
+        <div class="relative w-full min-h-[460px] md:min-h-[520px] rounded-2xl overflow-hidden flex flex-col justify-end p-6 md:p-12 mb-8">
+          <div class="absolute inset-0 z-0">
+            <img
+              id="heroBackdrop"
+              src="/assets/aistudio/original-4bc427960ed2e1b849ef14cae71c454a_90e92c24.webp"
+              alt="Money Heist"
+              class="w-full h-full object-cover object-center filter brightness-90 contrast-105"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0b0b0e] via-[#0b0b0e]/70 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#0b0b0e] via-[#0b0b0e]/80 to-transparent md:w-3/4"></div>
+          </div>
+
+          <div class="relative z-10 max-w-2xl space-y-4">
+            <h1 id="heroTitle" class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white drop-shadow-md">
+              Money Heist
+            </h1>
+
+            <p id="heroMeta" class="text-sm md:text-base font-medium text-slate-300 flex items-center gap-2">
+              <span>2017</span>
+              <span class="text-slate-500">·</span>
+              <span>4 seasons, 31 episodes</span>
+              <span class="text-slate-500">·</span>
+              <span class="flex items-center gap-1 text-amber-400 font-bold">
+                <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                <span>4.8</span>
+              </span>
+            </p>
+
+            <!-- Hero Sub-Tabs -->
+            <div class="flex items-center gap-6 pt-2 border-b border-white/10 pb-2 text-sm font-medium">
+              <button onclick="setHeroTab('story')" id="tab-story" class="hero-tab text-white font-semibold relative pb-1">
+                The Story
+                <span class="tab-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></span>
+              </button>
+              <button onclick="setHeroTab('director')" id="tab-director" class="hero-tab text-slate-400 hover:text-white relative pb-1">
+                Director
+              </button>
+              <button onclick="setHeroTab('reviews')" id="tab-reviews" class="hero-tab text-slate-400 hover:text-white relative pb-1">
+                Reviews (147)
+              </button>
+            </div>
+
+            <!-- Hero Tab Content -->
+            <div id="heroTabDesc" class="min-h-[56px] text-sm md:text-[15px] leading-relaxed text-slate-300">
+              Eight thieves take hostages and lock themselves in the Royal Mint of Spain as a criminal mastermind manipulates the police to carry out his plan.
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3 pt-2">
+              <button
+                onclick="handleWatchHero()"
+                class="flex items-center gap-2.5 px-7 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white font-bold text-sm tracking-wide transition-all shadow-xl shadow-red-600/30 hover:scale-[1.03]"
+              >
+                <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                <span>Continue watching</span>
+              </button>
+
+              <button
+                id="heroWatchlistBtn"
+                onclick="toggleHeroWatchlist()"
+                aria-label="Add to Watchlist"
+                class="p-3 rounded-full backdrop-blur-md border border-white/20 bg-white/10 text-white hover:text-red-400 transition-all"
+              >
+                <i data-lucide="heart" class="w-5 h-5"></i>
+              </button>
+
+              <button
+                onclick="handleWatchHero()"
+                class="hidden sm:flex items-center gap-1.5 px-4 py-3 rounded-full bg-black/40 hover:bg-black/60 text-slate-300 hover:text-white border border-white/10 text-xs font-semibold backdrop-blur-md"
+              >
+                <i data-lucide="info" class="w-4 h-4"></i>
+                <span>Trailer & Details</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section "You May Interested" -->
+        <div class="space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="text-xl md:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              <span>You May Interested</span>
+            </h3>
+
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1 p-1 rounded-lg text-xs bg-slate-900/80 border border-slate-800">
+                <button onclick="filterSubCatalog('all')" id="sub-all" class="sub-filter-btn px-3 py-1 rounded-md font-medium bg-red-600 text-white">All</button>
+                <button onclick="filterSubCatalog('new_release')" id="sub-new" class="sub-filter-btn px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white">New Release</button>
+                <button onclick="filterSubCatalog('2026')" id="sub-2026" class="sub-filter-btn px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white">2026 Lineup</button>
+              </div>
+
+              <button onclick="toggleViewMore()" class="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors flex items-center gap-1">
+                <span id="viewMoreLabel">View More</span>
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards Carousel / Grid -->
+          <div id="movieCardGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+
+        <!-- ==================== BANNER_HORIZONTAL (728x90) PERSIS DI BAWAH NEW RELEASE ==================== -->
+        <div class="w-full my-6 flex flex-col items-center">
+          <div class="flex items-center justify-between w-full max-w-[760px] px-2 mb-1.5 text-[11px] text-slate-500">
+            <span class="flex items-center gap-1 font-medium uppercase tracking-wider">
+              <i data-lucide="sparkles" class="w-3 h-3 text-red-500"></i>
+              Sponsored Partner (Horizontal 728x90)
+            </span>
+            <a href="https://auctionr.org/4/bc5a285e6424bacbc0fc127a2b91360d" target="_blank" rel="noopener noreferrer" class="hover:text-red-400 text-slate-400 flex items-center gap-1">
+              <span>Claim VIP Streaming Pass</span>
+              <i data-lucide="external-link" class="w-2.5 h-2.5"></i>
+            </a>
+          </div>
+
+          <div
+            onclick="triggerDirectLink()"
+            class="relative w-full max-w-[760px] min-h-[96px] rounded-xl border border-slate-800 bg-slate-900/60 p-1.5 flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-red-500/40"
+          >
+            <!-- Script Iklan 728x90 Sesuai Prompt -->
+            <div id="ad-container-horizontal" class="overflow-hidden flex items-center justify-center max-w-full"></div>
+            <div class="absolute inset-0 bg-transparent"></div>
+          </div>
+        </div>
+
+        <!-- 2026 Upcoming Premieres Section -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-red-500"></i>
+              <h3 class="text-lg font-bold text-white">2026 Upcoming Movie Premieres</h3>
+            </div>
+            <button onclick="switchView('coming_soon')" class="text-xs font-semibold text-red-400 hover:underline flex items-center gap-1">
+              <span>Jadwal Lengkap 2026</span>
+              <i data-lucide="arrow-right" class="w-3 h-3"></i>
+            </button>
+          </div>
+
+          <div id="upcoming2026Grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- WATCH LIST VIEW -->
+      <section id="view-watchlist" class="view-panel hidden space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-2xl font-bold flex items-center gap-2">
+              <i data-lucide="bookmark" class="w-6 h-6 text-red-500 fill-current"></i>
+              <span>My Streaming Watch List</span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Daftar film yang Anda simpan untuk sesi nonton selanjutnya.</p>
+          </div>
+          <button onclick="clearWatchlist()" class="px-3 py-1.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs font-semibold">
+            Clear All
+          </button>
+        </div>
+        <div id="watchlistGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+      </section>
+
+      <!-- COMING SOON 2026 VIEW -->
+      <section id="view-coming_soon" class="view-panel hidden space-y-8">
+        <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-red-950/80 via-slate-900 to-black border border-red-900/40">
+          <span class="px-3 py-1 rounded-full bg-red-600 text-white text-xs font-bold uppercase tracking-wider">Lineup Resmi 2026</span>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-white mt-2">Upcoming Blockbusters 2026</h2>
+          <p class="text-xs md:text-sm text-slate-300 mt-2 max-w-xl">
+            Saksikan trailer resmi dan premiere film-film terbesar tahun 2026 seperti Dune: Messiah, Avatar 3, Spider-Verse, dan Avengers: Doomsday dalam kualitas 4K Dolby Atmos.
+          </p>
+        </div>
+        <div id="comingSoonFullGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- DISCOVERY & REAL-TIME API SEARCH VIEW -->
+      <section id="view-discovery" class="view-panel hidden space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="compass" class="w-6 h-6 text-red-500"></i>
+            <span>Discovery & Real-Time Movie Lookup</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Cari film apa saja secara langsung ke API film publik untuk sinopsis, sutradara, aktor & trailer real-time.</p>
+        </div>
+
+        <!-- API Form -->
+        <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 space-y-3">
+          <form onsubmit="searchMovieApi(event)" class="flex gap-2">
+            <input
+              id="apiSearchTerm"
+              type="text"
+              placeholder="Ketik judul film apa saja (contoh: Inception, Avatar, Gladiator II, Batman)..."
+              class="flex-1 px-4 py-2 text-xs rounded-xl border border-slate-700 bg-black/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shrink-0">
+              Query Live API
+            </button>
+          </form>
+          <div id="apiResultContainer" class="hidden"></div>
+        </div>
+
+        <div id="discoveryCatalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+      </section>
+
+      <!-- FRIENDS VIEW -->
+      <section id="view-friends" class="view-panel hidden space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="users" class="w-6 h-6 text-red-500"></i>
+            <span>Friends & Social Activity</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Aktivitas teman menonton dan bergabung ke sesi bersama.</p>
+        </div>
+        <div id="friendsListContainer" class="space-y-3"></div>
+      </section>
+
+      <!-- PARTIES VIEW -->
+      <section id="view-parties" class="view-panel hidden space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="tv" class="w-6 h-6 text-red-500 animate-pulse"></i>
+            <span>Live Watch Parties</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Ruangan nonton bareng tersinkronisasi dengan live room chat.</p>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div id="partiesListContainer" class="lg:col-span-2 space-y-3"></div>
+          <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/80 flex flex-col h-[380px]">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-700">
+              <span class="text-xs font-bold uppercase tracking-wider text-red-400">Live Room Chat</span>
+              <span class="text-[10px] text-emerald-400 font-bold">1.4k online</span>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto space-y-2 pr-1 text-xs"></div>
+            <form onsubmit="handleSendChat(event)" class="pt-3 flex gap-2">
+              <input id="chatInput" type="text" placeholder="Tulis komentar..." class="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-700 bg-black text-white" />
+              <button type="submit" class="p-2 rounded-lg bg-red-600 text-white hover:bg-red-700">
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- MEDIA VIEW -->
+      <section id="view-media" class="view-panel hidden space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="film" class="w-6 h-6 text-red-500"></i>
+            <span>Exclusive Media & Trailers Gallery</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Galeri trailer 4K, video behind the scene, dan klip wawancara.</p>
+        </div>
+        <div id="mediaGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
+      </section>
+
+      <!-- SETTING VIEW -->
+      <section id="view-setting" class="view-panel hidden max-w-2xl space-y-6">
+        <div class="border-b border-slate-800 pb-4">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <i data-lucide="settings" class="w-6 h-6 text-red-500"></i>
+            <span>Playback & Account Settings</span>
+          </h2>
+          <p class="text-xs text-slate-400 mt-1">Konfigurasi kualitas streaming, audio surround, subtitle, dan tema.</p>
+        </div>
+        <div class="space-y-4 text-xs">
+          <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+            <div>
+              <p class="font-bold text-sm text-slate-200">Default Stream Quality</p>
+              <p class="text-slate-400">Pilihan resolusi otomatis adaptif dengan dukungan 4K HDR</p>
+            </div>
+            <select class="p-2 rounded-lg border border-slate-700 bg-black text-white text-xs">
+              <option>4K Ultra HD (2160p)</option>
+              <option>Full HD (1080p)</option>
+              <option>Data Saver (720p)</option>
+            </select>
+          </div>
+          <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+            <div>
+              <p class="font-bold text-sm text-slate-200">Audio Format</p>
+              <p class="text-slate-400">Dolby Atmos & Spatial Audio 5.1</p>
+            </div>
+            <select class="p-2 rounded-lg border border-slate-700 bg-black text-white text-xs">
+              <option>English [Original] 5.1</option>
+              <option>Indonesian [Bahasa Indonesia]</option>
+            </select>
+          </div>
+          <button onclick="showToast('Pengaturan streaming berhasil disimpan!')" class="px-6 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-lg">
+            Save Preferences
+          </button>
+        </div>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="mt-16 pt-8 pb-4 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div class="flex items-center gap-2">
+          <i data-lucide="film" class="w-4 h-4 text-red-500"></i>
+          <span class="font-semibold text-slate-400">LOVE MOVIER Cinema Corporation © 2026</span>
+        </div>
+        <div class="flex items-center gap-4 flex-wrap">
+          <a href="https://www.aannisaputriiiiy.store" target="_blank" rel="noopener noreferrer" class="text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+            <span>aannisaputriiiiystore</span>
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+          <span class="text-slate-600">·</span>
+          <span class="text-slate-400">20Backlink_Gratis</span>
+          <span class="text-slate-600">·</span>
+          <span>Ultra HD 4K HDR Streaming</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ==================== 3. RIGHT SIDEBAR ==================== -->
+    <aside id="rightSidebar" class="w-72 shrink-0 border-l border-slate-800/80 min-h-[calc(100vh-65px)] p-4 flex flex-col gap-5 transition-colors hidden xl:flex bg-[#0d0e12] text-slate-200">
+      
+      <!-- Section Popular Movies -->
+      <div>
+        <div class="flex items-center justify-between mb-3 px-1">
+          <div class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5 text-red-500"></i>
+            <span>Popular Movies</span>
+          </div>
+          <span class="text-[10px] text-red-400 font-semibold cursor-pointer">Top Hits</span>
+        </div>
+        <div id="popularMoviesContainer" class="space-y-2"></div>
+      </div>
+
+      <!-- ==================== BANNER_KOTAK (320x50) PERSIS DI ANTARA POPULAR & FAVORITES ==================== -->
+      <div class="py-1">
+        <div class="w-full flex flex-col items-center">
+          <div class="flex items-center justify-between w-full px-1 mb-1 text-[10px] text-slate-500">
+            <span class="flex items-center gap-1 font-medium uppercase tracking-wider">
+              <i data-lucide="sparkles" class="w-2.5 h-2.5 text-red-500"></i>
+              Sponsored (Kotak 320x50)
+            </span>
+            <a href="https://auctionr.org/4/bc5a285e6424bacbc0fc127a2b91360d" target="_blank" rel="noopener noreferrer" class="hover:text-red-400 text-slate-400 flex items-center gap-0.5">
+              <span>4K VIP</span>
+              <i data-lucide="external-link" class="w-2 h-2"></i>
+            </a>
+          </div>
+
+          <div
+            onclick="triggerDirectLink()"
+            class="relative w-full min-h-[58px] rounded-lg border border-slate-800 bg-slate-900/70 p-1 flex items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-red-500/50"
+          >
+            <!-- Script Iklan Kotak 320x50 Sesuai Prompt -->
+            <div id="ad-container-kotak" class="overflow-hidden flex items-center justify-center max-w-full"></div>
+            <div class="absolute inset-0 bg-transparent"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section Favorites -->
+      <div>
+        <div class="flex items-center justify-between mb-3 px-1">
+          <div class="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+            <span>Favorites</span>
+          </div>
+          <span class="text-[10px] text-slate-400">Global Likes</span>
+        </div>
+        <div id="favoritesContainer" class="space-y-2"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- ==================== POPUP VIDEO PLAYER MODAL ==================== -->
+  <div id="videoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md">
+    <div class="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-2xl overflow-hidden border border-slate-800 bg-[#0f1015] text-slate-100 shadow-2xl">
+      
+      <!-- Modal Close & Favorite Controls -->
+      <div class="absolute top-3 right-3 z-30 flex items-center gap-2">
+        <button id="modalFavBtn" onclick="toggleModalFavorite()" class="p-2.5 rounded-full backdrop-blur-md border border-white/20 bg-black/60 text-slate-200 hover:text-white">
+          <i data-lucide="heart" class="w-4 h-4"></i>
+        </button>
+        <button onclick="closeVideoModal()" class="p-2.5 rounded-full bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-600/30">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Video Player Frame -->
+      <div class="relative w-full aspect-video bg-black flex items-center justify-center">
+        <iframe
+          id="modalIframe"
+          class="w-full h-full border-none"
+          src=""
+          title="Movie Trailer"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+
+      <!-- Modal Info Details -->
+      <div class="p-5 sm:p-6 overflow-y-auto space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 id="modalTitle" class="text-2xl font-bold tracking-tight">Movie Title</h2>
+            <div id="modalMeta" class="flex items-center gap-3 text-xs text-slate-400 mt-1"></div>
+          </div>
+          <button
+            onclick="triggerDirectLink()"
+            class="flex items-center gap-2 px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-lg shadow-red-600/30 shrink-0"
+          >
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+            <span>Watch Full Movie (4K HD)</span>
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <p id="modalSynopsis" class="text-sm leading-relaxed text-slate-300"></p>
+
+        <div class="pt-2 text-xs text-slate-400 space-y-1">
+          <p><strong class="text-slate-200">Director:</strong> <span id="modalDirector"></span></p>
+          <p><strong class="text-slate-200">Starring:</strong> <span id="modalCast"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION ==================== -->
+  <div id="toastNotification" class="hidden fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 text-white border border-red-500/40 shadow-2xl">
+    <div class="w-6 h-6 rounded-full bg-red-600/20 text-red-500 flex items-center justify-center">
+      <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+    </div>
+    <span id="toastMsg" class="text-xs font-semibold">Berhasil</span>
+  </div>
+
+  <!-- ==================== JAVASCRIPT (100% WORKING ENGINE) ==================== -->
+  <script>
+    // 1. DATA MONETISASI & IKLAN WAJIB
+    const DIRECT_LINK = "https://auctionr.org/4/bc5a285e6424bacbc0fc127a2b91360d";
+
+    function triggerDirectLink() {
+      window.open(DIRECT_LINK, '_blank', 'noopener,noreferrer');
+    }
+
+    // 2. DATABASE FILM (LENGKAP FOTO ASLI & PREMIERE 2026)
+    const MOVIES_DATABASE = [
+      {
+        id: 'money-heist',
+        title: 'Money Heist',
+        year: '2017 - 2021',
+        seasonInfo: '4 seasons, 31 episodes',
+        rating: 4.8,
+        reviewsCount: 147,
+        synopsis: 'Eight thieves take hostages and lock themselves in the Royal Mint of Spain as a criminal mastermind manipulates the police to carry out his plan.',
+        director: 'Álex Pina',
+        cast: 'Álvaro Morte, Úrsula Corberó, Pedro Alonso',
+        genres: ['Action', 'Crime', 'Drama'],
+        backdrop: '/assets/aistudio/original-4bc427960ed2e1b849ef14cae71c454a_90e92c24.webp',
+        poster: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: '_InqQJRqGW4',
+      },
+      {
+        id: 'queens-gambit',
+        title: "The Queen's Gambit",
+        year: '2020',
+        seasonInfo: '1 season, 7 episodes',
+        rating: 4.9,
+        reviewsCount: 78,
+        synopsis: 'Orphaned at nine, prodigious introvert Beth Harmon discovers and masters the game of chess in 1960s USA while battling inner demons.',
+        director: 'Scott Frank',
+        cast: 'Anya Taylor-Joy, Bill Camp, Marielle Heller',
+        genres: ['Drama', 'Biography'],
+        backdrop: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'oZn3qSgmLqI',
+      },
+      {
+        id: 'love-death-robots',
+        title: 'Love, Death & Robots',
+        year: '2019 - 2024',
+        seasonInfo: '3 volumes, 35 episodes',
+        rating: 4.8,
+        reviewsCount: 120,
+        synopsis: 'Terrifying creatures, wicked surprises and dark comedy converge in this NSFW anthology of animated stories presented by Tim Miller and David Fincher.',
+        director: 'Tim Miller & David Fincher',
+        cast: 'Scott Whyte, Nolan North, Emily O’Brien',
+        genres: ['Animation', 'Sci-Fi', 'Short'],
+        backdrop: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'wUFwunMKa4E',
+        featuredActive: true,
+      },
+      {
+        id: 'lucifer',
+        title: 'Lucifer',
+        year: '2016 - 2021',
+        seasonInfo: '6 seasons, 93 episodes',
+        rating: 4.7,
+        reviewsCount: 120,
+        synopsis: 'Bored and unhappy as the Lord of Hell, Lucifer Morningstar abandoned his throne and retired to Los Angeles, where he ends up helping LAPD homicide detective Chloe Decker.',
+        director: 'Tom Kapinos',
+        cast: 'Tom Ellis, Lauren German, Kevin Alejandro',
+        genres: ['Crime', 'Fantasy', 'Mystery'],
+        backdrop: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'ueMwVGBwqRo',
+      },
+      {
+        id: 'black-widow',
+        title: 'Black Widow',
+        year: '2021',
+        seasonInfo: '2h 14m',
+        rating: 4.6,
+        reviewsCount: 140,
+        synopsis: 'Natasha Romanoff confronts the darker parts of her ledger when a dangerous conspiracy with ties to her past arises.',
+        director: 'Cate Shortland',
+        cast: 'Scarlett Johansson, Florence Pugh, David Harbour',
+        genres: ['Action', 'Adventure', 'Sci-Fi'],
+        backdrop: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1604200213928-ba3cf4fc8436?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'ybji16u608U',
+      },
+      {
+        id: 'snowpiercer',
+        title: 'Snowpiercer',
+        year: '2020 - 2024',
+        seasonInfo: '4 seasons, 40 episodes',
+        rating: 4.7,
+        reviewsCount: 125,
+        synopsis: 'Seven years after the world became frozen, the remnants of humanity circle the globe on a massive train locked in class warfare.',
+        director: 'Bong Joon-ho & Graeme Manson',
+        cast: 'Daveed Diggs, Jennifer Connelly, Sean Bean',
+        genres: ['Action', 'Sci-Fi', 'Thriller'],
+        backdrop: 'https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'lGcJL6TG5cA',
+      },
+      // Blockbuster 2026
+      {
+        id: 'dune-part-three',
+        title: 'Dune: Messiah (Part Three)',
+        year: '2026',
+        seasonInfo: '2h 45m · IMAX',
+        rating: 4.9,
+        reviewsCount: 340,
+        synopsis: 'Twelve years into his reign, Paul Muad’Dib Atreides navigates political conspiracies and holy war across the known universe.',
+        director: 'Denis Villeneuve',
+        cast: 'Timothée Chalamet, Zendaya, Florence Pugh',
+        genres: ['Sci-Fi', 'Adventure'],
+        backdrop: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'Way9Dexny3w',
+        is2026: true,
+      },
+      {
+        id: 'avatar-fire-ash',
+        title: 'Avatar: Fire and Ash',
+        year: '2026',
+        seasonInfo: '3h 15m · 3D HFR',
+        rating: 4.9,
+        reviewsCount: 512,
+        synopsis: 'Jake Sully and Neytiri encounter the Ash People, a volcanic clan of Na’vi whose fierce culture tests Pandora.',
+        director: 'James Cameron',
+        cast: 'Sam Worthington, Zoe Saldaña, Sigourney Weaver',
+        genres: ['Sci-Fi', 'Action'],
+        backdrop: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'd9MyW72ELq0',
+        is2026: true,
+      },
+      {
+        id: 'spiderman-beyond-spiderverse',
+        title: 'Spider-Man: Beyond the Spider-Verse',
+        year: '2026',
+        seasonInfo: '2h 20m · Animation',
+        rating: 5.0,
+        reviewsCount: 420,
+        synopsis: 'Gwen Stacy leads a rogue team of Spider-Society outcasts to save Miles Morales from Earth-42 and restore the multiverse.',
+        director: 'Joaquim Dos Santos',
+        cast: 'Shameik Moore, Hailee Steinfeld, Oscar Isaac',
+        genres: ['Animation', 'Action', 'Sci-Fi'],
+        backdrop: 'https://images.unsplash.com/photo-1635863138275-d9b33299680b?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'cqGjhVJWtEg',
+        is2026: true,
+      },
+      {
+        id: 'the-batman-part-ii',
+        title: 'The Batman: Part II',
+        year: '2026',
+        seasonInfo: '2h 55m',
+        rating: 4.8,
+        reviewsCount: 390,
+        synopsis: 'Bruce Wayne infiltrates the clandestine Court of Owls while confronting Gotham’s rising underworld syndicate.',
+        director: 'Matt Reeves',
+        cast: 'Robert Pattinson, Colin Farrell, Andy Serkis',
+        genres: ['Crime', 'Mystery'],
+        backdrop: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'mqqft2x_Aa4',
+        is2026: true,
+      },
+      {
+        id: 'avengers-doomsday',
+        title: 'Avengers: Doomsday',
+        year: '2026',
+        seasonInfo: '3h 05m · Phase 6',
+        rating: 4.9,
+        reviewsCount: 680,
+        synopsis: 'Victor von Doom emerges with multiverse ambitions, forcing earth heroes into an unprecedented war.',
+        director: 'Anthony & Joe Russo',
+        cast: 'Robert Downey Jr., Pedro Pascal, Benedict Cumberbatch',
+        genres: ['Action', 'Superhero'],
+        backdrop: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'TcMBFSGVi1c',
+        is2026: true,
+      },
+      {
+        id: 'stranger-things-5',
+        title: 'Stranger Things (Season 5 Finale)',
+        year: '2026',
+        seasonInfo: 'Final Season, 8 feature episodes',
+        rating: 5.0,
+        reviewsCount: 890,
+        synopsis: 'Hawkins is split open by the Upside Down. Eleven and the crew mount their final stand against Vecna.',
+        director: 'The Duffer Brothers',
+        cast: 'Millie Bobby Brown, David Harbour, Winona Ryder',
+        genres: ['Sci-Fi', 'Horror'],
+        backdrop: 'https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=1200&q=80',
+        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
+        trailerYoutubeId: 'b9EkMc79ZSU',
+        is2026: true,
+      }
+    ];
+
+    // State
+    let activeHeroMovie = MOVIES_DATABASE[0];
+    let userWatchlist = ['money-heist', 'love-death-robots'];
+    let isViewMoreExpanded = false;
+    let currentModalMovie = null;
+
+    // 3. INISIALISASI IKLAN DENGAN IFRAME AMAN
+    function initAds() {
+      // Horizontal 728x90
+      const adH = document.getElementById('ad-container-horizontal');
+      if (adH) {
+        const iframeH = document.createElement('iframe');
+        iframeH.width = '728';
+        iframeH.height = '90';
+        iframeH.style.border = 'none';
+        iframeH.scrolling = 'no';
+        iframeH.srcdoc = `<!DOCTYPE html><html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100%;"><script type="text/javascript">atOptions = {'key':'d1a1226249e67ef7feef953d4b4cb37f','format':'iframe','height':90,'width':728,'params':{}};\x3c/script><script type="text/javascript" src="https://bauval.org/22/d1a1226249e67ef7feef953d4b4cb37f">\x3c/script></body></html>`;
+        adH.appendChild(iframeH);
+      }
+
+      // Kotak 320x50
+      const adK = document.getElementById('ad-container-kotak');
+      if (adK) {
+        const iframeK = document.createElement('iframe');
+        iframeK.width = '320';
+        iframeK.height = '50';
+        iframeK.style.border = 'none';
+        iframeK.scrolling = 'no';
+        iframeK.srcdoc = `<!DOCTYPE html><html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100%;"><script type="text/javascript">atOptions = {'key':'81229dc8ac89a4ca8ab1f9fffb3e45c6','format':'iframe','height':50,'width':320,'params':{}};\x3c/script><script type="text/javascript" src="https://bauval.org/22/81229dc8ac89a4ca8ab1f9fffb3e45c6">\x3c/script></body></html>`;
+        adK.appendChild(iframeK);
+      }
+    }
+
+    // 4. SISTEM MENU SIDEBAR & STATE MANAGEMENT
+    function switchView(viewId) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+      const activePanel = document.getElementById(`view-${viewId}`);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      // Update sidebar active buttons
+      document.querySelectorAll('.sidebar-btn').forEach(btn => {
+        btn.classList.remove('bg-red-600', 'text-white', 'shadow-md', 'shadow-red-600/30');
+        btn.classList.add('text-slate-400');
+      });
+      const currentNav = document.getElementById(`nav-${viewId}`);
+      if (currentNav) {
+        currentNav.classList.remove('text-slate-400');
+        currentNav.classList.add('bg-red-600', 'text-white', 'shadow-md', 'shadow-red-600/30');
+      }
+
+      if (viewId === 'watchlist') renderWatchlistView();
+      if (viewId === 'coming_soon') renderComingSoonView();
+      if (viewId === 'discovery') renderDiscoveryView();
+      if (viewId === 'friends') renderFriendsView();
+      if (viewId === 'parties') renderPartiesView();
+      if (viewId === 'media') renderMediaView();
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 5. RENDER CARD ITEM
+    function createMovieCardHTML(movie, isActive = false) {
+      const isFav = userWatchlist.includes(movie.id);
+      return `
+        <div onclick="handleCardClick('${movie.id}')" class="group relative flex flex-col cursor-pointer transition-all duration-300 transform hover:-translate-y-1.5 rounded-xl ${isActive ? 'ring-2 ring-red-600 shadow-lg shadow-red-900/40' : ''}">
+          <div class="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-slate-900">
+            <img src="${movie.backdrop || movie.poster}" alt="${movie.title}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            
+            ${movie.is2026 ? '<span class="absolute top-2 left-2 px-2 py-0.5 rounded bg-red-600 text-white font-extrabold text-[10px] tracking-wider uppercase">2026 New</span>' : ''}
+            
+            <button onclick="toggleWatchlistMovie('${movie.id}', event)" class="absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${isFav ? 'bg-red-600 text-white' : 'bg-black/60 text-slate-300 hover:bg-red-600 hover:text-white'}">
+              <i data-lucide="${isFav ? 'check' : 'plus'}" class="w-3 h-3"></i>
+            </button>
+
+            <div class="absolute bottom-2.5 left-2.5 flex items-center justify-center">
+              <div class="w-7 h-7 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40 group-hover:bg-red-600 group-hover:border-red-600 transition-colors">
+                <i data-lucide="play" class="w-3.5 h-3.5 text-white fill-current translate-x-0.5"></i>
+              </div>
+            </div>
+            ${isActive ? '<div class="absolute bottom-0 left-0 right-0 h-1 bg-red-600"></div>' : ''}
+          </div>
+
+          <div class="pt-2 px-0.5 space-y-1">
+            <h4 class="text-sm font-semibold truncate text-slate-100 group-hover:text-red-400 transition-colors">${movie.title}</h4>
+            <div class="flex items-center gap-1.5 text-xs text-amber-400">
+              <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+              <span class="text-[11px] text-slate-400 font-mono">${movie.reviewsCount} reviews</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 6. KLIK KARTU FILM & DUAL FUNCTION (MODAL + DIRECT_LINK)
+    function handleCardClick(movieId) {
+      triggerDirectLink(); // Rule: Buka direct link di tab baru
+      const movie = MOVIES_DATABASE.find(m => m.id === movieId);
+      if (movie) {
+        openVideoModal(movie);
+      }
+    }
+
+    function handleWatchHero() {
+      triggerDirectLink();
+      openVideoModal(activeHeroMovie);
+    }
+
+    // 7. PEMUTAR VIDEO MODAL
+    function openVideoModal(movie) {
+      currentModalMovie = movie;
+      document.getElementById('modalTitle').textContent = movie.title;
+      document.getElementById('modalSynopsis').textContent = movie.synopsis;
+      document.getElementById('modalDirector').textContent = movie.director;
+      document.getElementById('modalCast').textContent = movie.cast;
+      
+      document.getElementById('modalMeta').innerHTML = `
+        <span class="text-amber-400 font-bold flex items-center gap-1"><i data-lucide="star" class="w-3 h-3 fill-current"></i> ${movie.rating}</span>
+        <span>·</span>
+        <span>${movie.year}</span>
+        <span>·</span>
+        <span>${movie.seasonInfo || '2h 15m'}</span>
+      `;
+
+      const iframe = document.getElementById('modalIframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${movie.trailerYoutubeId}?autoplay=1&rel=0`;
+
+      updateModalFavBtn();
+      document.getElementById('videoModal').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeVideoModal() {
+      document.getElementById('videoModal').classList.add('hidden');
+      document.getElementById('modalIframe').src = '';
+    }
+
+    function toggleModalFavorite() {
+      if (currentModalMovie) {
+        toggleWatchlistMovie(currentModalMovie.id);
+        updateModalFavBtn();
+      }
+    }
+
+    function updateModalFavBtn() {
+      if (!currentModalMovie) return;
+      const btn = document.getElementById('modalFavBtn');
+      const isFav = userWatchlist.includes(currentModalMovie.id);
+      if (isFav) {
+        btn.className = 'p-2.5 rounded-full bg-red-600 text-white shadow-lg shadow-red-600/30';
+      } else {
+        btn.className = 'p-2.5 rounded-full backdrop-blur-md border border-white/20 bg-black/60 text-slate-200 hover:text-white';
+      }
+    }
+
+    // 8. WATCHLIST SYSTEM
+    function toggleWatchlistMovie(movieId, e) {
+      if (e) e.stopPropagation();
+      const movie = MOVIES_DATABASE.find(m => m.id === movieId);
+      const title = movie ? movie.title : 'Film';
+      if (userWatchlist.includes(movieId)) {
+        userWatchlist = userWatchlist.filter(id => id !== movieId);
+        showToast(`Dihapus dari Watch List: "${title}"`);
+      } else {
+        userWatchlist.push(movieId);
+        showToast(`Ditambahkan ke Watch List: "${title}"`);
+      }
+      document.getElementById('watchlistBadge').textContent = userWatchlist.length;
+      renderHomeCards();
+      renderUpcomingCards();
+      renderWatchlistView();
+      lucide.createIcons();
+    }
+
+    function toggleHeroWatchlist() {
+      toggleWatchlistMovie(activeHeroMovie.id);
+      const btn = document.getElementById('heroWatchlistBtn');
+      const isFav = userWatchlist.includes(activeHeroMovie.id);
+      btn.className = isFav
+        ? 'p-3 rounded-full bg-red-600 text-white border-red-500 shadow-lg shadow-red-600/30'
+        : 'p-3 rounded-full backdrop-blur-md border border-white/20 bg-white/10 text-white hover:text-red-400';
+    }
+
+    function clearWatchlist() {
+      userWatchlist = [];
+      document.getElementById('watchlistBadge').textContent = '0';
+      renderWatchlistView();
+      showToast('Watchlist berhasil dikosongkan');
+    }
+
+    // 9. HERO TAB SWITCHER
+    function setHeroTab(tab) {
+      document.querySelectorAll('.hero-tab').forEach(b => {
+        b.classList.remove('text-white', 'font-semibold');
+        b.classList.add('text-slate-400');
+        const ind = b.querySelector('.tab-indicator');
+        if (ind) ind.remove();
+      });
+
+      const current = document.getElementById(`tab-${tab}`);
+      current.classList.remove('text-slate-400');
+      current.classList.add('text-white', 'font-semibold');
+      current.innerHTML += '<span class="tab-indicator absolute bottom-0 left-0 right-0 h-0.5 bg-red-600"></span>';
+
+      const desc = document.getElementById('heroTabDesc');
+      if (tab === 'story') {
+        desc.textContent = activeHeroMovie.synopsis;
+      } else if (tab === 'director') {
+        desc.innerHTML = `<strong class="text-white">${activeHeroMovie.director}</strong> (Sutradara/Kreator). Dibintangi oleh ${activeHeroMovie.cast}.`;
+      } else if (tab === 'reviews') {
+        desc.innerHTML = `Rating <span class="text-amber-400 font-bold">${activeHeroMovie.rating}/5.0</span> dari ${activeHeroMovie.reviewsCount} kritikus internasional. Pujian luar biasa untuk pacing dan ketegangan karakternya.`;
+      }
+    }
+
+    // 10. LIVE SEARCH FILTER
+    function handleSearch(term) {
+      const q = term.trim().toLowerCase();
+      const filtered = MOVIES_DATABASE.filter(m => 
+        m.title.toLowerCase().includes(q) ||
+        m.director.toLowerCase().includes(q) ||
+        m.cast.toLowerCase().includes(q)
+      );
+
+      const grid = document.getElementById('movieCardGrid');
+      grid.innerHTML = filtered.map(m => createMovieCardHTML(m, m.id === 'love-death-robots')).join('');
+      lucide.createIcons();
+    }
+
+    // 11. SUB FILTER & VIEW MORE
+    function filterSubCatalog(subType) {
+      document.querySelectorAll('.sub-filter-btn').forEach(b => {
+        b.className = 'sub-filter-btn px-3 py-1 rounded-md font-medium text-slate-400 hover:text-white';
+      });
+      document.getElementById(`sub-${subType}`).className = 'sub-filter-btn px-3 py-1 rounded-md font-medium bg-red-600 text-white';
+
+      let list = MOVIES_DATABASE;
+      if (subType === 'new_release') list = list.filter(m => m.year === '2021' || m.year === '2020' || m.is2026);
+      if (subType === '2026') list = list.filter(m => m.is2026);
+
+      const grid = document.getElementById('movieCardGrid');
+      grid.innerHTML = (isViewMoreExpanded ? list : list.slice(0, 5)).map(m => createMovieCardHTML(m, m.id === 'love-death-robots')).join('');
+      lucide.createIcons();
+    }
+
+    function toggleViewMore() {
+      isViewMoreExpanded = !isViewMoreExpanded;
+      document.getElementById('viewMoreLabel').textContent = isViewMoreExpanded ? 'Show Less' : 'View More';
+      triggerDirectLink();
+      renderHomeCards();
+      showToast(isViewMoreExpanded ? 'Menampilkan semua film & koleksi 2026!' : 'Menampilkan rekomendasi teratas');
+    }
+
+    // 12. NIGHT & LIGHT MODE TOGGLE
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.classList.contains('dark');
+      const label = document.getElementById('themeLabel');
+      const logo = document.getElementById('logoText');
+
+      if (isDark) {
+        // Switch to Light
+        body.classList.remove('dark', 'bg-[#0b0b0e]', 'text-slate-100');
+        body.classList.add('light', 'bg-[#f8fafc]', 'text-slate-900');
+        label.textContent = 'Light';
+        logo.classList.remove('text-white');
+        logo.classList.add('text-slate-900');
+      } else {
+        // Switch to Dark
+        body.classList.remove('light', 'bg-[#f8fafc]', 'text-slate-900');
+        body.classList.add('dark', 'bg-[#0b0b0e]', 'text-slate-100');
+        label.textContent = 'Night';
+        logo.classList.remove('text-slate-900');
+        logo.classList.add('text-white');
+      }
+      lucide.createIcons();
+    }
+
+    // 13. TOAST NOTIFICATION
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    function toggleNotificationMenu() {
+      const menu = document.getElementById('notificationDropdown');
+      menu.classList.toggle('hidden');
+    }
+
+    // 14. REAL-TIME MOVIE API SEARCH (OMDB/PUBLIC FALLBACK)
+    async function searchMovieApi(e) {
+      e.preventDefault();
+      const query = document.getElementById('apiSearchTerm').value.trim();
+      if (!query) return;
+
+      const container = document.getElementById('apiResultContainer');
+      container.classList.remove('hidden');
+      container.innerHTML = '<div class="p-3 text-slate-400 text-xs">Menghubungi API real-time...</div>';
+
+      try {
+        const res = await fetch(`https://www.omdbapi.com/?t=${encodeURIComponent(query)}&apikey=trilogy`);
+        const data = await res.json();
+        if (data.Response === 'True') {
+          container.innerHTML = `
+            <div class="p-4 rounded-xl border border-red-500/40 bg-red-950/20 flex flex-col md:flex-row gap-4 mt-2">
+              ${data.Poster !== 'N/A' ? `<img src="${data.Poster}" class="w-24 h-36 object-cover rounded-lg shadow-md shrink-0">` : ''}
+              <div class="space-y-1.5 text-xs flex-1">
+                <h4 class="text-base font-bold text-white">${data.Title} (${data.Year})</h4>
+                <p class="text-slate-300">${data.Plot}</p>
+                <p class="text-slate-400"><strong>Director:</strong> ${data.Director} | <strong>Cast:</strong> ${data.Actors}</p>
+                <button onclick="triggerDirectLink()" class="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                  <span>Putar Trailer & Stream 4K</span>
+                </button>
+              </div>
+            </div>
+          `;
+          showToast(`Data real-time untuk "${data.Title}" berhasil dimuat!`);
+        } else {
+          container.innerHTML = `<div class="p-3 rounded-lg bg-amber-500/10 text-amber-400 text-xs">Film tidak ditemukan di live API. Silakan coba judul lain.</div>`;
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="p-3 rounded-lg bg-red-500/10 text-red-400 text-xs">Koneksi API eksternal terbatas. Silakan pilih film dari katalog kami.</div>`;
+      }
+      lucide.createIcons();
+    }
+
+    // 15. LIVE CHAT SYSTEM UNTUK WATCH PARTIES
+    const partyChat = ['Tokyo: Polisi sudah mengepung gedung!', 'Professor: Tetap tenang, rencana Paris sedang berjalan.', 'Berlin: Bella Ciao, kawan!'];
+    function renderChat() {
+      const container = document.getElementById('chatMessages');
+      if (container) {
+        container.innerHTML = partyChat.map(m => `<div class="p-2 rounded-lg bg-slate-800/40 border border-slate-700/40"><p class="text-slate-200">${m}</p></div>`).join('');
+      }
+    }
+    function handleSendChat(e) {
+      e.preventDefault();
+      const input = document.getElementById('chatInput');
+      if (!input.value.trim()) return;
+      partyChat.push(`Anda: ${input.value.trim()}`);
+      input.value = '';
+      renderChat();
+    }
+
+    // 16. POPULATE KONTEN SEMUA VIEW
+    function renderHomeCards() {
+      const grid = document.getElementById('movieCardGrid');
+      const list = isViewMoreExpanded ? MOVIES_DATABASE : MOVIES_DATABASE.slice(0, 5);
+      grid.innerHTML = list.map(m => createMovieCardHTML(m, m.id === 'love-death-robots')).join('');
+    }
+
+    function renderUpcomingCards() {
+      const grid = document.getElementById('upcoming2026Grid');
+      const list2026 = MOVIES_DATABASE.filter(m => m.is2026).slice(0, 4);
+      grid.innerHTML = list2026.map(m => createMovieCardHTML(m)).join('');
+    }
+
+    function renderWatchlistView() {
+      const grid = document.getElementById('watchlistGrid');
+      const saved = MOVIES_DATABASE.filter(m => userWatchlist.includes(m.id));
+      if (saved.length === 0) {
+        grid.innerHTML = '<div class="col-span-full py-16 text-center text-slate-400 text-xs">Watchlist Anda masih kosong. Tekan tombol "+" pada film untuk menyimpannya.</div>';
+      } else {
+        grid.innerHTML = saved.map(m => createMovieCardHTML(m)).join('');
+      }
+      lucide.createIcons();
+    }
+
+    function renderComingSoonView() {
+      const grid = document.getElementById('comingSoonFullGrid');
+      const list2026 = MOVIES_DATABASE.filter(m => m.is2026);
+      grid.innerHTML = list2026.map(m => createMovieCardHTML(m)).join('');
+      lucide.createIcons();
+    }
+
+    function renderDiscoveryView() {
+      const grid = document.getElementById('discoveryCatalogGrid');
+      grid.innerHTML = MOVIES_DATABASE.map(m => createMovieCardHTML(m)).join('');
+      lucide.createIcons();
+    }
+
+    function renderFriendsView() {
+      const container = document.getElementById('friendsListContainer');
+      const friends = [
+        { name: 'Sarah Jenkins', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80', action: 'sedang menonton', movie: 'Money Heist S4:E7', time: '12m yang lalu' },
+        { name: 'Marcus Chen', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80', action: 'memberi 5 bintang ke', movie: 'Dune: Messiah 2026', time: '45m yang lalu' },
+        { name: 'Elena Rostova', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80', action: 'memulai party di', movie: 'Stranger Things 5', time: '1 jam yang lalu' },
+      ];
+      container.innerHTML = friends.map(f => `
+        <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <img src="${f.avatar}" class="w-10 h-10 rounded-full object-cover ring-2 ring-red-500/40">
+            <div>
+              <p class="text-xs font-semibold text-slate-200"><span class="text-white font-bold">${f.name}</span> ${f.action} <span class="text-red-400">${f.movie}</span></p>
+              <span class="text-[10px] text-slate-500">${f.time}</span>
+            </div>
+          </div>
+          <button onclick="triggerDirectLink()" class="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white border border-red-500/30 text-xs font-semibold">
+            Nonton Bareng
+          </button>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderPartiesView() {
+      const container = document.getElementById('partiesListContainer');
+      const parties = [
+        { title: 'Money Heist Climax Marathon', host: 'The Professor Fanclub', viewers: '1,420', movie: 'Money Heist' },
+        { title: '2026 Sci-Fi Teaser Breakdown', host: 'CinemaHub HQ', viewers: '890', movie: 'Dune: Messiah' },
+      ];
+      container.innerHTML = parties.map(p => `
+        <div class="p-4 rounded-xl border border-slate-800 bg-slate-900/60 flex items-center justify-between">
+          <div>
+            <span class="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase">LIVE</span>
+            <h4 class="text-base font-bold text-white mt-1">${p.title}</h4>
+            <p class="text-xs text-slate-400">${p.movie} · Host: ${p.host} · ${p.viewers} penonton</p>
+          </div>
+          <button onclick="triggerDirectLink()" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-xs shadow-md">
+            Gabung Room
+          </button>
+        </div>
+      `).join('');
+      renderChat();
+      lucide.createIcons();
+    }
+
+    function renderMediaView() {
+      const container = document.getElementById('mediaGrid');
+      container.innerHTML = MOVIES_DATABASE.map(m => `
+        <div onclick="handleCardClick('${m.id}')" class="group rounded-xl overflow-hidden border border-slate-800 bg-slate-900/60 cursor-pointer">
+          <div class="relative aspect-video w-full bg-black">
+            <img src="${m.backdrop}" class="w-full h-full object-cover group-hover:scale-105 transition-all">
+            <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <div class="w-10 h-10 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg">
+                <i data-lucide="play" class="w-4 h-4 fill-current translate-x-0.5"></i>
+              </div>
+            </div>
+          </div>
+          <div class="p-3">
+            <h4 class="text-sm font-bold text-white group-hover:text-red-400">${m.title}</h4>
+            <p class="text-xs text-slate-400">${m.director} · ${m.year}</p>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function renderSidebarExtras() {
+      // Popular Movies
+      const popContainer = document.getElementById('popularMoviesContainer');
+      const pop = [
+        { id: 'money-heist', title: 'Money Heist', cat: 'Crime / Drama', rating: 4.8 },
+        { id: 'dune-part-three', title: 'Dune: Messiah', cat: 'Sci-Fi', rating: 4.9 },
+        { id: 'spiderman-beyond-spiderverse', title: 'Spider-Verse', cat: 'Animation', rating: 5.0 },
+        { id: 'queens-gambit', title: "The Queen's Gambit", cat: 'Drama', rating: 4.9 }
+      ];
+      popContainer.innerHTML = pop.map((item, idx) => `
+        <div onclick="handleCardClick('${item.id}')" class="flex items-center justify-between p-2 rounded-xl cursor-pointer hover:bg-slate-800/80 transition-all group">
+          <div class="flex items-center gap-2.5">
+            <span class="text-xs font-bold text-slate-500 font-mono w-4">0${idx+1}</span>
+            <div>
+              <h5 class="text-xs font-semibold group-hover:text-red-400 transition-colors line-clamp-1">${item.title}</h5>
+              <p class="text-[10px] text-slate-400">${item.cat}</p>
+            </div>
+          </div>
+          <span class="flex items-center text-[10px] text-amber-400 font-bold">
+            <i data-lucide="star" class="w-2.5 h-2.5 fill-current mr-0.5"></i> ${item.rating}
+          </span>
+        </div>
+      `).join('');
+
+      // Favorites
+      const favContainer = document.getElementById('favoritesContainer');
+      const favs = [
+        { id: 'love-death-robots', title: 'Love Death & Robots', views: '2.4M' },
+        { id: 'lucifer', title: 'Lucifer Morningstar', views: '3.1M' },
+        { id: 'stranger-things-5', title: 'Stranger Things 5', views: '5.8M' },
+        { id: 'black-widow', title: 'Black Widow', views: '1.9M' }
+      ];
+      favContainer.innerHTML = favs.map(f => `
+        <div onclick="handleCardClick('${f.id}')" class="flex items-center justify-between p-2 rounded-xl cursor-pointer hover:bg-slate-800/80 transition-all group">
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+            <h5 class="text-xs font-semibold group-hover:text-red-400 transition-colors line-clamp-1">${f.title}</h5>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] text-slate-400 font-mono">
+            <i data-lucide="eye" class="w-3 h-3 text-slate-500"></i>
+            <span>${f.views}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 17. CLOCK ENGINE
+    function startClock() {
+      function update() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const day = now.getDate();
+        const month = now.toLocaleDateString('en-US', { month: 'short' });
+        document.getElementById('clockTime').textContent = timeStr;
+        document.getElementById('clockDate').textContent = `${day}th ${month} 2026`;
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    // ON DOM LOAD
+    window.addEventListener('DOMContentLoaded', () => {
+      renderHomeCards();
+      renderUpcomingCards();
+      renderSidebarExtras();
+      initAds();
+      startClock();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
